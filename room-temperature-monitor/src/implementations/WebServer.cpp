@@ -1,26 +1,26 @@
-#include "web_server.hpp"
+#include "WebServer.hpp"
 
-AsyncWebServer server(80);
+AsyncWebServer WebServer::server(80);
 
-void setupWebServer()
+void WebServer::setup()
 {
     String rootHtml;
     loadHtmlFromFile(rootHtml);
-    
+
     server.on("/", HTTP_GET, [rootHtml](AsyncWebServerRequest *request)
               { handleRootRequest(request, rootHtml); });
     server.on("/temperatures", HTTP_GET, handleTemperaturesRequest);
     server.begin();
 }
 
-void handleRootRequest(AsyncWebServerRequest *request, String html)
+void WebServer::handleRootRequest(AsyncWebServerRequest *request, String html)
 {
     request->send(200, "text/html", html);
 }
 
-void handleTemperaturesRequest(AsyncWebServerRequest *request)
+void WebServer::handleTemperaturesRequest(AsyncWebServerRequest *request)
 {
-    std::vector<TemperatureInfo> temperatures = getTemperatures();
+    std::vector<TemperatureInfo> temperatures = TemperatureSensor::getTemperatures();
     DynamicJsonDocument doc(1024);
 
     JsonArray tempArray = doc.to<JsonArray>();
@@ -37,7 +37,7 @@ void handleTemperaturesRequest(AsyncWebServerRequest *request)
     request->send(200, "application/json", json);
 }
 
-void loadHtmlFromFile(String &html)
+void WebServer::loadHtmlFromFile(String &html)
 {
     File file = SPIFFS.open("/index.html", "r");
     if (!file)

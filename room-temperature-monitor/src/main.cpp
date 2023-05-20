@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include "wifi.hpp"
-#include "web_server.hpp"
+#include "WifiConnection.hpp"
+#include "WebServer.hpp"
 
 void setup(void)
 {
@@ -12,8 +12,9 @@ void setup(void)
     Serial.println("Failed to mount file system");
     return;
   }
-  connectToWifi();
-  setupWebServer();
+
+  WifiConnection::connect();
+  WebServer::setup();
 
   Serial.println();
   Serial.println("Init OK");
@@ -21,5 +22,5 @@ void setup(void)
 
 void loop(void)
 {
-  delay(1000);
+  TemperatureSensor::update();
 }

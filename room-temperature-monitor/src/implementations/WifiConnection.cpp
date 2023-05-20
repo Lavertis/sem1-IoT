@@ -1,6 +1,6 @@
-#include "wifi.hpp"
+#include "WifiConnection.hpp"
 
-void loadWifiCredentials(String &ssid, String &password)
+void WifiConnection::loadCredentials(String &ssid, String &password)
 {
     File file = SPIFFS.open("/wifi_credentials.json", "r");
     if (!file)
@@ -33,10 +33,10 @@ void loadWifiCredentials(String &ssid, String &password)
     password = doc["password"].as<String>();
 }
 
-void connectToWifi()
+void WifiConnection::connect()
 {
     String ssid, password;
-    loadWifiCredentials(ssid, password); // Load the credentials
+    loadCredentials(ssid, password); // Load the credentials
 
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid.c_str(), password.c_str());
