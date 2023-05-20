@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include "lib/wifi.h"
-#include "lib/web_server.h"
+#include "wifi.hpp"
+#include "web_server.hpp"
 
 void setup(void)
 {
@@ -12,7 +12,6 @@ void setup(void)
     Serial.println("Failed to mount file system");
     return;
   }
-
   connectToWifi();
   setupWebServer();
 

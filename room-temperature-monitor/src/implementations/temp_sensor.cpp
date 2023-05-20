@@ -1,19 +1,10 @@
-#pragma once
-#include <DS18B20.h> // https://github.com/matmunk/DS18B20
-#include <vector>
+#include "temp_sensor.hpp"
 
 DS18B20 ds(5);
 
-struct TemperatureInfo
-{
-    float temperature;
-    int resolution;
-    String address;
-};
-
 void getAddressString(uint8_t address[8], String &addressString)
 {
-    for (int j = 0; j < 8; j++)
+    for (uint8_t j = 0; j < 8; j++)
     {
         char buff[3];
         sprintf(buff, "%02X", address[j]);
