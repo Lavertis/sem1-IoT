@@ -1,7 +1,9 @@
 #pragma once
 #include <ESPAsyncWebServer.h>
-#include <vector>
 #include <SPIFFS.h>
+#include <vector>
+#include <ArduinoJson.h>
+#include "temp_sensor.h"
 
 String html;
 
@@ -32,37 +34,24 @@ void handleRootRequest(AsyncWebServerRequest *request)
 
 void handleTemperaturesRequest(AsyncWebServerRequest *request)
 {
-    std::vector<float> temperatures = getTemperatures();
-    std::vector<std::string> jsonTemperatures;
+    std::vector<TemperatureInfo> temperatures = getTemperatures();
+    DynamicJsonDocument doc(1024);
 
-    for (int i = 0; i < temperatures.size(); i++)
-    {
-        char buffer[10];
-        sprintf(buffer, "%.4f", temperatures[i]);
-        jsonTemperatures.push_back(buffer);
+    JsonArray tempArray = doc.to<JsonArray>();
+    for (TemperatureInfo &tempInfo : temperatures) {
+        JsonObject tempObject = tempArray.createNestedObject();
+        tempObject["temperature"] = tempInfo.temperature;
+        tempObject["resolution"] = tempInfo.resolution;
+        tempObject["address"] = tempInfo.address.c_str();
     }
 
-    std::string json = "[";
-    for (int i = 0; i < jsonTemperatures.size(); i++)
-    {
-        json += jsonTemperatures[i];
-        if (i < jsonTemperatures.size() - 1)
-        {
-            json += ",";
-        }
-    }
-    json += "]";
-
+    String json;
+    serializeJson(tempArray, json);
     request->send(200, "application/json", json.c_str());
 }
 
 void setupWebServer()
 {
-    if (!SPIFFS.begin())
-    {
-        Serial.println("Failed to mount file system");
-        return;
-    }
     loadHtmlFromFile();
 
     server.on("/", HTTP_GET, handleRootRequest);

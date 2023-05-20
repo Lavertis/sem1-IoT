@@ -1,16 +1,19 @@
 #include <Arduino.h>
-#include "lib/sensor_setup.h"
-#include "lib/wifi_setup.h"
+#include "lib/wifi.h"
 #include "lib/web_server.h"
-#include "wifi_credentials.h"
 
 void setup(void)
 {
   Serial.begin(115200);
   delay(1000);
 
-  initDS18B20();
-  connectToWifi(WIFI_SSID, WIFI_PASSWORD);
+  if (!SPIFFS.begin())
+  {
+    Serial.println("Failed to mount file system");
+    return;
+  }
+
+  connectToWifi();
   setupWebServer();
 
   Serial.println();
