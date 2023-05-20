@@ -1,80 +1,27 @@
 #pragma once
 #include <ESPAsyncWebServer.h>
 #include <vector>
+#include <SPIFFS.h>
 
-String html = "<!DOCTYPE html>"
-              "<html>"
-              "<head>"
-              "<title>Temperature Monitor</title>"
-              "<style>"
-              ".temperature-square {"
-              "  display: inline-block;"
-              "  width: 100px;"
-              "  height: 100px;"
-              "  margin: 10px;"
-              "  text-align: center;"
-              "  font-weight: bold;"
-              "}"
-              "body {"
-              "  display: flex;"
-              "  justify-content: center;"
-              "  align-items: center;"
-              "  height: 60vh;"
-              "  margin: 0;"
-              "}"
-              "</style>"
-              "</head>"
-              "<body>"
-              "<div>"
-              "<h1 style='text-align: center;'>Temperature Monitor</h1>"
-              "<div id='temperature-container'></div>"
-              "<script>"
-              "function createTemperatureSquare(temperature) {"
-              "  var square = document.createElement('div');"
-              "  square.className = 'temperature-square';"
-              "  square.style.backgroundColor = val2hsl(temperature, 25, 30);"
-              "  square.textContent = temperature;"
-              "  return square;"
-              "}"
-              "function val2hsl(value, min, max) {"
-              " if (value < min) {"
-              " value = min;"
-              " } else if (value > max) {"
-              " value = max;"
-              " }"
-              ""
-              " let hue = (1 - ((value - min) / (max - min))) * 240;"
-              " return `hsl(${hue}, 100%, 50%)`;"
-              "}"
-              "function updateTemperatureDisplay(data) {"
-              "var container = document.getElementById('temperature-container');"
-              "container.innerHTML = '';"
-              "var row = document.createElement('div');"
-              "row.className = 'temperature-row';"
-              "for (var i = 0; i < data.length; i++) {"
-              "var square = createTemperatureSquare(data[i]);"
-              "row.appendChild(square);"
-              "if ((i + 1) % 4 === 0) {"
-              "container.appendChild(row);"
-              "row = document.createElement('div');"
-              "row.className = 'temperature-row';"
-              "}"
-              "}"
-              "if (row.children.length > 0) {"
-              "container.appendChild(row);"
-              "}"
-              "}"
-              "setInterval(function() {"
-              "  fetch('/temperatures')"
-              "    .then(response => response.json())"
-              "    .then(data => {"
-              "      updateTemperatureDisplay(data);"
-              "    });"
-              "}, 3000);" // Update temperature every 1 second
-              "</script>"
-              "</div>"
-              "</body>"
-              "</html>";
+String html;
+
+void loadHtmlFromFile()
+{
+    File file = SPIFFS.open("/index.html", "r");
+    if (!file)
+    {
+        Serial.println("Failed to open file for reading");
+        return;
+    }
+
+    while (file.available())
+    {
+        html += file.readString();
+    }
+    file.close();
+
+    Serial.println("Html loaded from file");
+}
 
 AsyncWebServer server(80);
 
@@ -111,6 +58,13 @@ void handleTemperaturesRequest(AsyncWebServerRequest *request)
 
 void setupWebServer()
 {
+    if (!SPIFFS.begin())
+    {
+        Serial.println("Failed to mount file system");
+        return;
+    }
+    loadHtmlFromFile();
+
     server.on("/", HTTP_GET, handleRootRequest);
     server.on("/temperatures", HTTP_GET, handleTemperaturesRequest);
     server.begin();

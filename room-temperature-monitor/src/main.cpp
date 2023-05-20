@@ -19,20 +19,5 @@ void setup(void)
 
 void loop(void)
 {
-  // while (ds.selectNext())
-  // {
-  //   uint8_t address[8];
-  //   ds.getAddress(address);
-  //   for (int j = 0; j < sizeof(address); j++)
-  //   {
-  //     sprintf(&addressString[j * 2], "%02X", address[j]);
-  //   }
-  //   float temp = ds.getTempC();
-  //   Serial.print("Address: ");
-  //   Serial.println(addressString);
-  //   Serial.print("Temp: ");
-  //   Serial.println(temp);
-  // }
-
   delay(1000);
 }
