@@ -1,87 +1,21 @@
-// /*
-//   Blink
-
-//   Turns an LED on for one second, then off for one second, repeatedly.
-
-//   Most Arduinos have an on-board LED you can control. On the UNO, MEGA and ZERO
-//   it is attached to digital pin 13, on MKR1000 on pin 6. LED_BUILTIN is set to
-//   the correct LED pin independent of which board is used.
-//   If you want to know what pin the on-board LED is connected to on your Arduino
-//   model, check the Technical Specs of your board at:
-//   https://www.arduino.cc/en/Main/Products
-
-//   modified 8 May 2014
-//   by Scott Fitzgerald
-//   modified 2 Sep 2016
-//   by Arturo Guadalupi
-//   modified 8 Sep 2016
-//   by Colby Newman
-
-//   This example code is in the public domain.
-
-//   https://www.arduino.cc/en/Tutorial/BuiltInExamples/Blink
-// */
-
-// #include <Arduino.h>
-// #include <DS18B20.h>
-// #define LED 16
-
-// DS18B20 ds(14);
-
-// // the setup function runs once when you press reset or power the board
-// void setup()
-// {
-//   // initialize digital pin LED_BUILTIN as an output.
-//   pinMode(LED, OUTPUT);
-// }
-
-// // the loop function runs over and over again forever
-// void loop()
-// {
-//   digitalWrite(LED, HIGH); // turn the LED on (HIGH is the voltage level)
-//   delay(1000);             // wait for a second
-//   digitalWrite(LED, LOW);  // turn the LED off by making the voltage LOW
-//   delay(1000);             // wait for a second
-//   while (ds.selectNext())
-//   {
-//     Serial.println(ds.getTempC());
-//   }
-// }
-
-/*
-  WiFiAccessPoint.ino creates a WiFi access point and provides a web server on it.
-
-  Steps:
-  1. Connect to the access point "yourAp"
-  2. Point your web browser to http://192.168.4.1/H to turn the LED on or http://192.168.4.1/L to turn it off
-     OR
-     Run raw TCP "GET /H" and "GET /L" on PuTTY terminal with 192.168.4.1 as IP address and 80 as port
-
-  Created for arduino-esp32 on 04 July, 2018
-  by Elochukwu Ifediora (fedy0)
-*/
-
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WiFiAP.h>
-
-#define LED_GREEN 16 // Set the GPIO pin where you connected your test LED or comment this line out if your dev board has a built-in LED
-
-// Set these to your desired credentials.
-const char *ssid = "AndroidAP7741";
-const char *password = "1234567890";
-
-#define ledPin 17 // GPI17
-#define ledPin2 16
-#define dsPin 16
+#include <Arduino.h>
 #include <DS18B20.h>
+#include <WiFi.h>
+
+#define ledPin 32 // GPI17
+#define ledPin2 33
+#define dsPin 14 // GPI14
+
 DS18B20 ds(dsPin);
 float temp = -100;
-#include <WiFi.h>
+float temp2 = -100;
 
+const char *ssid = ""; // Your ssid
+const char *password = "";  // Your Password
 WiFiServer server(80);
+
 String header;
-String ledstate = "off";
+String ledstate1 = "off";
 String ledstate2 = "off";
 
 void setup(void)
@@ -90,9 +24,9 @@ void setup(void)
   delay(1000);
   Serial.println();
   pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
   pinMode(ledPin2, OUTPUT);
-  digitalWrite(ledPin2, HIGH);
+  digitalWrite(ledPin, LOW);
+  digitalWrite(ledPin2, LOW);
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -143,68 +77,70 @@ void loop(void)
             client.println("Content-type:text/html");
             client.println("Connection: close");
             client.println();
-
             Serial.print("Temperature: ");
             temp = ds.getTempC();
+            ds.selectNext();
+            temp2 = ds.getTempC();
             Serial.print(temp);
             Serial.println(" C ");
-            if (header.indexOf("GET /led/1/on") >= 0)
+
+            if (header.indexOf("GET /led1/on") >= 0)
             {
               Serial.println("LED on");
-              ledstate = "on";
+              ledstate1 = "on";
               digitalWrite(ledPin, HIGH);
             }
-            else if (header.indexOf("GET /led/1/off") >= 0)
+            else if (header.indexOf("GET /led1/off") >= 0)
             {
-              Serial.println("LED off");
-              ledstate = "off";
+              Serial.println("LED1 off");
+              ledstate1 = "off";
               digitalWrite(ledPin, LOW);
             }
 
-            if (header.indexOf("GET /led/2/on") >= 0)
+            if (header.indexOf("GET /led2/on") >= 0)
             {
-              Serial.println("LED on");
+              Serial.println("LED2 on");
               ledstate2 = "on";
               digitalWrite(ledPin2, HIGH);
             }
-            else if (header.indexOf("GET /led/2/off") >= 0)
+            else if (header.indexOf("GET /led2/off") >= 0)
             {
-              Serial.println("LED off");
+              Serial.println("LED2 off");
               ledstate2 = "off";
               digitalWrite(ledPin2, LOW);
             }
             // Display the HTML web page
             client.println("<!DOCTYPE html><html>");
             client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />");
-            client.println("<meta http-equiv=\"refresh\" content=\"10\" />");
+            client.println("<meta http-equiv=\"refresh\" content=\"2\" />");
             client.println("<link rel=\"icon\" href=\"data:,\" />");
             // CSS to style the on/off buttons
             // Feel free to change the background-color and font-size attributes
             client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
             client.println(".button { background-color: #07878A; border: none; color: white; padding: 16px 40px;");
             client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
-            client.println(".button2 {background-color:#8a0787;}</style></head>");
+            client.println(".button2 {background-color: #8a0787;}</style></head>");
             // Web Page Heading
             client.println("<body><h1>ESP32 temperature control</h1>");
             // Display current state, and ON/OFF buttons for GPIO
-            client.println("<p>Temperature: " + String(temp) + " </p>");
+            client.println("<p>Temperature 1: " + String(temp) + " </p>");
             // If the LED is off, it displays the ON button
-
-            if (ledstate == "off")
+            if (ledstate1 == "off")
             {
-              client.println("<p><a href=\"/led/1/on\"><button class=\"button\">ON</button></a></p>");
+              client.println("<p><a href=\"/led1/on\"><button class=\"button\">ON</button></a></p>");
             }
             else
             {
-              client.println("<p><a href=\"/led/1/off\"><button class=\"button button2\">OFF</button></a></p>");
+              client.println("<p><a href=\"/led1/off\"><button class=\"button button2\">OFF</button></a></p>");
             }
+            client.println("<p>Temperature2 : " + String(temp2) + " </p>");
             if (ledstate2 == "off")
             {
-              client.println("<p><a href=\"/led/2/on\"><button class=\"button\">ON</button></a></p>");
+              client.println("<p><a href=\"/led2/on\"><button class=\"button\">ON</button></a></p>");
             }
             else
             {
-              client.println("<p><a href=\"/led/2/off\"><button class=\"button button2\">OFF</button></a></p>");
+              client.println("<p><a href=\"/led2/off\"><button class=\"button button2\">OFF</button></a></p>");
             }
             client.println("</body></html>"); // The HTTP response ends with another blank line
             client.println();
