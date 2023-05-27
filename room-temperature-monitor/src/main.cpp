@@ -15,6 +15,7 @@ void setup(void)
 
   WifiConnection::connect();
   WebServer::setup();
+  TemperatureSensor::setResolution(11);
 
   Serial.println();
   Serial.println("Init OK");

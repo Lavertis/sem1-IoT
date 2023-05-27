@@ -2,6 +2,12 @@
 
 DS18B20 TemperatureSensor::ds{5};
 std::vector<TemperatureInfo> TemperatureSensor::temperatures;
+uint8_t TemperatureSensor::resolution = 12;
+
+void TemperatureSensor::setResolution(uint8_t resolution)
+{
+    TemperatureSensor::resolution = resolution;
+}
 
 void TemperatureSensor::getAddressString(uint8_t address[8], String &addressString)
 {

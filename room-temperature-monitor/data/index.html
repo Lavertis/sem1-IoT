@@ -180,7 +180,6 @@
             let newMin = Number(this.value);
             if (newMin < maxTemp) {
               minTemp = newMin;
-              fetchTemperatures();
             } else {
               alert("Min temperature should be less than max temperature");
               this.value = minTemp;
@@ -193,7 +192,6 @@
             let newMax = Number(this.value);
             if (newMax > minTemp) {
               maxTemp = newMax;
-              fetchTemperatures();
             } else {
               alert("Max temperature should be greater than min temperature");
               this.value = maxTemp;
