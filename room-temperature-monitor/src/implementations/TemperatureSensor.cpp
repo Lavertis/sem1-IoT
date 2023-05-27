@@ -5,12 +5,12 @@ std::vector<TemperatureInfo> TemperatureSensor::temperatures;
 
 void TemperatureSensor::getAddressString(uint8_t address[8], String &addressString)
 {
-    for (uint8_t j = 0; j < 8; j++)
+    char addressCharArr[17] = {0};
+    for (uint8_t i = 0; i < 8; ++i)
     {
-        char buff[3];
-        sprintf(buff, "%02X", address[j]);
-        addressString += buff;
+        sprintf(&addressCharArr[i * 2], "%02X", address[i]);
     }
+    addressString = addressCharArr;
 }
 
 void TemperatureSensor::update()
@@ -23,8 +23,6 @@ void TemperatureSensor::update()
         ds.getAddress(address);
         String addressString;
         getAddressString(address, addressString);
-
-        constexpr uint8_t resolution = 9;
         ds.setResolution(resolution);
 
         TemperatureInfo tempInfo;
@@ -41,4 +39,23 @@ void TemperatureSensor::update()
 std::vector<TemperatureInfo> TemperatureSensor::getTemperatures()
 {
     return TemperatureSensor::temperatures;
+}
+
+String TemperatureSensor::getTemperaturesAsJson()
+{
+    StaticJsonDocument<512> doc;
+    JsonArray tempArray = doc.to<JsonArray>();
+
+    auto temperatures = TemperatureSensor::getTemperatures();
+    for (TemperatureInfo &tempInfo : temperatures)
+    {
+        JsonObject tempObject = tempArray.createNestedObject();
+        tempObject["temperature"] = tempInfo.temperature;
+        tempObject["resolution"] = tempInfo.resolution;
+        tempObject["address"] = tempInfo.address.c_str();
+    }
+
+    String json;
+    serializeJson(tempArray, json);
+    return json;
 }
