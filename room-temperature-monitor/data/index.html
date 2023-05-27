@@ -12,7 +12,7 @@
         margin: 0;
       }
       #root {
-        margin-top: 5rem;
+        margin-top: 3rem;
       }
       .temperature-square {
         display: flex;
@@ -31,7 +31,7 @@
       .address {
         font-size: 1em;
       }
-      .interval-container {
+      .inputs-container {
         text-align: center;
         margin-bottom: 2rem;
       }
@@ -41,34 +41,62 @@
       .text-center {
         text-align: center;
       }
+      .mb-1 {
+        margin-bottom: 1rem;
+      }
     </style>
   </head>
   <body>
     <div id="root">
       <h1 class="text-center">Temperature Monitor</h1>
-      <div class="interval-container">
-        <label for="interval">Update interval (seconds): </label>
-        <input
-          type="number"
-          id="interval"
-          name="interval"
-          min="1"
-          max="15"
-          value="1"
-        />
+      <p class="text-center">Client IP: <span id="client-ip"></span></p>
+      <div class="inputs-container">
+        <div class="mb-1">
+          <label for="interval">Update interval (seconds): </label>
+          <input
+            type="number"
+            id="interval"
+            name="interval"
+            min="1"
+            max="15"
+            value="3"
+          />
+        </div>
+
+        <div class="mb-1">
+          <label for="min-temp">Min temperature (°C): </label>
+          <input
+            type="number"
+            id="min-temp"
+            name="min-temp"
+            min="-55"
+            value="25"
+            max="124"
+          />
+        </div>
+
+        <div>
+          <label for="max-temp">Max temperature (°C): </label>
+          <input
+            type="number"
+            id="max-temp"
+            name="max-temp"
+            min="-56"
+            value="30"
+            max="125"
+          />
+        </div>
       </div>
       <div id="temperature-container"></div>
       <script>
         let intervalId;
+        let minTemp = 25;
+        let maxTemp = 30;
 
-        function createTemperatureSquare(
-          temperatureInfo,
-          minTemp = 25,
-          maxTemp = 30
-        ) {
+        function createTemperatureSquare(temperatureInfo) {
           const square = document.createElement("div");
           square.className = "temperature-square";
-          square.style.backgroundColor = val2hsl(
+          square.style.backgroundColor = getTempColor(
             temperatureInfo.temperature,
             minTemp,
             maxTemp
@@ -92,10 +120,15 @@
           return square;
         }
 
-        function val2hsl(value, min, max) {
-          value = Math.max(min, Math.min(max, value));
-          let hue = (1 - (value - min) / (max - min)) * 240;
-          return `hsl(${hue}, 100%, 50%)`;
+        function getTempColor(value, min, max) {
+          switch (true) {
+            case value < min:
+              return "#0000FF"; // Blue
+            case value >= min && value <= max:
+              return "#00FF00"; // Green
+            case value > max:
+              return "#FF0000"; // Red
+          }
         }
 
         function updateTemperatureDisplay(data, columnCount = 4) {
@@ -119,14 +152,9 @@
           }
         }
 
-        function fetchData() {
+        function fetchTemperatures() {
           fetch("/temperatures")
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error("Network response was not ok");
-              }
-              return response.json();
-            })
+            .then((response) => response.json())
             .then((data) => {
               updateTemperatureDisplay(data);
             })
@@ -135,15 +163,54 @@
             });
         }
 
+        function fetchClientIp() {
+          fetch("/ip")
+            .then((response) => response.text())
+            .then((data) => {
+              document.getElementById("client-ip").textContent = data;
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        }
+
+        document
+          .getElementById("min-temp")
+          .addEventListener("change", function () {
+            let newMin = Number(this.value);
+            if (newMin < maxTemp) {
+              minTemp = newMin;
+              fetchTemperatures();
+            } else {
+              alert("Min temperature should be less than max temperature");
+              this.value = minTemp;
+            }
+          });
+
+        document
+          .getElementById("max-temp")
+          .addEventListener("change", function () {
+            let newMax = Number(this.value);
+            if (newMax > minTemp) {
+              maxTemp = newMax;
+              fetchTemperatures();
+            } else {
+              alert("Max temperature should be greater than min temperature");
+              this.value = maxTemp;
+            }
+          });
+
         document
           .getElementById("interval")
           .addEventListener("change", function () {
             clearInterval(intervalId);
-            intervalId = setInterval(fetchData, this.value * 1000);
+            intervalId = setInterval(fetchTemperatures, this.value * 1000);
           });
 
+        fetchClientIp();
+        fetchTemperatures();
         // Fetch new temperature data every 3 seconds by default
-        intervalId = setInterval(fetchData, 3000);
+        intervalId = setInterval(fetchTemperatures, 3000);
       </script>
     </div>
   </body>

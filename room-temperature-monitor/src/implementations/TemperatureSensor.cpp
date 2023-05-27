@@ -5,12 +5,12 @@ std::vector<TemperatureInfo> TemperatureSensor::temperatures;
 
 void TemperatureSensor::getAddressString(uint8_t address[8], String &addressString)
 {
-    char addressCharArr[17] = {0};
+    char outBuffer[17];
     for (uint8_t i = 0; i < 8; ++i)
     {
-        sprintf(&addressCharArr[i * 2], "%02X", address[i]);
+        sprintf(&outBuffer[i * 2], "%02X", address[i]);
     }
-    addressString = addressCharArr;
+    addressString = outBuffer;
 }
 
 void TemperatureSensor::update()

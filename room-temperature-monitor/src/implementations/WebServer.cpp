@@ -9,6 +9,7 @@ void WebServer::setup()
 
     server.on("/", HTTP_GET, handleRootRequest);
     server.on("/temperatures", HTTP_GET, handleTemperaturesRequest);
+    server.on("/ip", HTTP_GET, handleIpRequest);
     server.begin();
 }
 
@@ -20,6 +21,12 @@ void WebServer::handleRootRequest(AsyncWebServerRequest *request)
 void WebServer::handleTemperaturesRequest(AsyncWebServerRequest *request)
 {
     request->send(200, "application/json", TemperatureSensor::getTemperaturesAsJson());
+}
+
+void WebServer::handleIpRequest(AsyncWebServerRequest *request)
+{
+    IPAddress remoteIP = request->client()->remoteIP();
+    request->send(200, "text/plain", remoteIP.toString());
 }
 
 void WebServer::loadRootHtmlFromFile()
