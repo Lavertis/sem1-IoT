@@ -2,8 +2,8 @@
 #include <DS18B20.h>
 #include <WiFi.h>
 
-#define ledPin 32 // GPI17
-#define ledPin2 33
+#define ledPin 27 // GPI17
+#define ledPin2 26
 #define dsPin 14 // GPI14
 
 DS18B20 ds(dsPin);
