@@ -118,15 +118,21 @@ void PrintWykres(int dataLen, int color)
 {
   char tempS[100];
   sOut += "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\"\
-width=\"400\" height=\"150\">\n";
-  sOut += "<rect width=\"400\" height=\"150\" fill=\"rgb(200, 200, 200)\
+width=\"400\" height=\"200\">\n";
+  sOut += "<rect x=\"50\" y=\"20\" width=\"350\" height=\"150\" fill=\"rgb(200, 200, 200)\
 \" stroke-width=\"1\" stroke=\"rgb(255, 255, 255)\" />\n";
+
+  // Add axes
+  sOut += "<line x1=\"50\" y1=\"170\" x2=\"400\" y2=\"170\" stroke=\"black\" stroke-width=\"2\" />\n"; // X-axis
+  sOut += "<line x1=\"50\" y1=\"20\" x2=\"50\" y2=\"170\" stroke=\"black\" stroke-width=\"2\" />\n";   // Y-axis
+
   if (color == 1)
     sOut += "<g stroke=\"red\">\n";
   if (color == 2)
     sOut += "<g stroke=\"blue\">\n";
   if (color == 3)
     sOut += "<g stroke=\"yellow\">\n";
+
   float miny = 1000;
   float maxy = -1000;
   float dx, skala;
@@ -145,18 +151,32 @@ width=\"400\" height=\"150\">\n";
     skala = 75;
   y = int((dataT[1] - miny) * skala);
   x = 1;
+
   for (int i = 2; i < dataLen; i += 1)
   {
     newY = int((dataT[i] - miny) * skala);
     newX = x + 1;
     sprintf(tempS, "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" \
 stroke-width=\"2\" />\n",
-            x, 130 - y, newX, 130 - newY);
+            x + 50, 170 - y, newX + 50, 170 - newY);
     sOut += tempS;
     y = newY;
     x = newX;
   }
   sOut += "</g>\n";
+
+  // Add Y-axis labels
+  sprintf(tempS, "<text x=\"15\" y=\"25\" font-family=\"Verdana\" font-size=\"15\">%.2f</text>\n", maxy);
+  sOut += tempS;
+  sprintf(tempS, "<text x=\"15\" y=\"175\" font-family=\"Verdana\" font-size=\"15\">%.2f</text>\n", miny);
+  sOut += tempS;
+
+  // Add X-axis labels
+  for (int i = 0; i <= dataLen; i += 15) // assuming the readings are sufficiently large
+  {
+    sprintf(tempS, "<text x=\"%d\" y=\"200\" font-family=\"Verdana\" font-size=\"10\">%d</text>\n", 50 + i, i);
+    sOut += tempS;
+  }
+
   sOut += "</svg>\n";
-  // webServer.send(200, "image/svg+xml", sOut);
 }
