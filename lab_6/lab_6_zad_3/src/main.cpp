@@ -118,7 +118,7 @@ void PrintWykres(int dataLen, int color)
 {
   char tempS[100];
   sOut += "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\"\
-width=\"400\" height=\"200\">\n";
+width=\"450\" height=\"220\">\n"; // increase height to accomodate x-axis labels
   sOut += "<rect x=\"50\" y=\"20\" width=\"350\" height=\"150\" fill=\"rgb(200, 200, 200)\
 \" stroke-width=\"1\" stroke=\"rgb(255, 255, 255)\" />\n";
 
@@ -165,18 +165,41 @@ stroke-width=\"2\" />\n",
   }
   sOut += "</g>\n";
 
-  // Add Y-axis labels
-  sprintf(tempS, "<text x=\"15\" y=\"25\" font-family=\"Verdana\" font-size=\"15\">%.2f</text>\n", maxy);
-  sOut += tempS;
-  sprintf(tempS, "<text x=\"15\" y=\"175\" font-family=\"Verdana\" font-size=\"15\">%.2f</text>\n", miny);
-  sOut += tempS;
+  // Add Y-axis labels and tick marks
+  // sprintf(tempS, "<text x=\"0\" y=\"25\" font-family=\"Verdana\" font-size=\"15\">%.2f</text>\n", maxy);
+  // sOut += tempS;
+  // sprintf(tempS, "<text x=\"0\" y=\"175\" font-family=\"Verdana\" font-size=\"15\">%.2f</text>\n", miny);
+  // sOut += tempS;
+  sOut += "<line x1=\"45\" y1=\"170\" x2=\"50\" y2=\"170\" stroke=\"black\" stroke-width=\"2\" />\n"; // Y min tick
+  // sOut += "<line x1=\"45\" y1=\"20\" x2=\"50\" y2=\"20\" stroke=\"black\" stroke-width=\"2\" />\n";   // Y max tick
 
-  // Add X-axis labels
-  for (int i = 0; i <= dataLen; i += 15) // assuming the readings are sufficiently large
+  float ySpacing = 1.0; // you can change this value to change the spacing of y-axis ticks and labels
+
+  // Add Y-axis tick marks
+  float yStart = ceil(miny / ySpacing) * ySpacing; // starting point for y-axis labels and ticks, rounded up to nearest ySpacing
+  for (float y = miny; y <= maxy + ySpacing; y += ySpacing)
   {
-    sprintf(tempS, "<text x=\"%d\" y=\"200\" font-family=\"Verdana\" font-size=\"10\">%d</text>\n", 50 + i, i);
+    int yPixel = 170 - int((y - miny) * skala);
+    sprintf(tempS, "<text x=\"0\" y=\"%d\" font-family=\"Verdana\" font-size=\"10\">%.1f</text>\n", yPixel + 5, y);
+    sOut += tempS;
+    sprintf(tempS, "<line x1=\"45\" y1=\"%d\" x2=\"50\" y2=\"%d\" stroke=\"black\" stroke-width=\"2\" />\n", yPixel, yPixel); // Y tick
     sOut += tempS;
   }
+
+  int xOffset = 49;
+
+  // Add X-axis labels and tick marks
+  for (int i = 0; i <= dataLen; i += 15) // assuming the readings are sufficiently large
+  {
+    sprintf(tempS, "<text x=\"%d\" y=\"200\" font-family=\"Verdana\" font-size=\"10\">%d</text>\n", xOffset + i, i);
+    sOut += tempS;
+    sprintf(tempS, "<line x1=\"%d\" y1=\"170\" x2=\"%d\" y2=\"175\" stroke=\"black\" stroke-width=\"2\" />\n", xOffset + i, xOffset + i); // X tick
+    sOut += tempS;
+  }
+
+  // Add axis labels
+  sOut += "<text x=\"46\" y=\"10\" font-family=\"Verdana\" font-size=\"15\">T</text>\n";   // Y-axis label
+  sOut += "<text x=\"410\" y=\"175\" font-family=\"Verdana\" font-size=\"15\">n</text>\n"; // X-axis label
 
   sOut += "</svg>\n";
 }
