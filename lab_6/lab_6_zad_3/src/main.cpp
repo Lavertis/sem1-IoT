@@ -7,7 +7,7 @@ WebServer webServer(80);
 
 float dataT[1000] = {0.0};
 String sOut = "";
-int autorefresh = 10;
+int autorefresh = 5;
 int ile = 0;
 float bmpT = 0.0;
 
@@ -180,7 +180,7 @@ stroke-width=\"2\" />\n",
   for (float y = miny; y <= maxy + ySpacing; y += ySpacing)
   {
     int yPixel = 170 - int((y - miny) * skala);
-    sprintf(tempS, "<text x=\"0\" y=\"%d\" font-family=\"Verdana\" font-size=\"10\">%.1f</text>\n", yPixel + 5, y);
+    sprintf(tempS, "<text x=\"20\" y=\"%d\" font-family=\"Verdana\" font-size=\"10\">%.1f</text>\n", yPixel + 5, y);
     sOut += tempS;
     sprintf(tempS, "<line x1=\"45\" y1=\"%d\" x2=\"50\" y2=\"%d\" stroke=\"black\" stroke-width=\"2\" />\n", yPixel, yPixel); // Y tick
     sOut += tempS;
@@ -191,15 +191,15 @@ stroke-width=\"2\" />\n",
   // Add X-axis labels and tick marks
   for (int i = 0; i <= dataLen; i += 15) // assuming the readings are sufficiently large
   {
-    sprintf(tempS, "<text x=\"%d\" y=\"200\" font-family=\"Verdana\" font-size=\"10\">%d</text>\n", xOffset + i, i);
+    sprintf(tempS, "<text x=\"%d\" y=\"190\" font-family=\"Verdana\" font-size=\"10\">%d</text>\n", xOffset + i, i);
     sOut += tempS;
     sprintf(tempS, "<line x1=\"%d\" y1=\"170\" x2=\"%d\" y2=\"175\" stroke=\"black\" stroke-width=\"2\" />\n", xOffset + i, xOffset + i); // X tick
     sOut += tempS;
   }
 
   // Add axis labels
-  sOut += "<text x=\"46\" y=\"10\" font-family=\"Verdana\" font-size=\"15\">T</text>\n";   // Y-axis label
-  sOut += "<text x=\"410\" y=\"175\" font-family=\"Verdana\" font-size=\"15\">n</text>\n"; // X-axis label
+  sOut += "<text x=\"35\" y=\"10\" font-family=\"Verdana\" font-size=\"15\">T</text>\n";   // Y-axis label
+  sOut += "<text x=\"395\" y=\"185\" font-family=\"Verdana\" font-size=\"15\">n</text>\n"; // X-axis label
 
   sOut += "</svg>\n";
 }
