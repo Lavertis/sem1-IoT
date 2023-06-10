@@ -2,10 +2,12 @@
 
 DS18B20 TemperatureSensor::ds{5};
 std::vector<TemperatureInfo> TemperatureSensor::temperatures;
+std::mutex temperatures_mutex;
 uint8_t TemperatureSensor::resolution = 12;
 
 void TemperatureSensor::setResolution(uint8_t resolution)
 {
+    std::lock_guard<std::mutex> lock(temperatures_mutex);
     TemperatureSensor::resolution = resolution;
 }
 
@@ -39,12 +41,14 @@ void TemperatureSensor::update()
         tempTemperatures.push_back(tempInfo);
     }
 
-    TemperatureSensor::temperatures = tempTemperatures;
+    std::lock_guard<std::mutex> lock(temperatures_mutex);
+    temperatures = tempTemperatures;
 }
 
 std::vector<TemperatureInfo> TemperatureSensor::getTemperatures()
 {
-    return TemperatureSensor::temperatures;
+    std::lock_guard<std::mutex> lock(temperatures_mutex);
+    return temperatures;
 }
 
 String TemperatureSensor::getTemperaturesAsJson()
@@ -52,8 +56,13 @@ String TemperatureSensor::getTemperaturesAsJson()
     StaticJsonDocument<512> doc;
     JsonArray tempArray = doc.to<JsonArray>();
 
-    auto temperatures = TemperatureSensor::getTemperatures();
-    for (TemperatureInfo &tempInfo : temperatures)
+    std::vector<TemperatureInfo> localTemperatures;
+    {
+        std::lock_guard<std::mutex> lock(temperatures_mutex);
+        localTemperatures = temperatures;
+    }
+
+    for (TemperatureInfo &tempInfo : localTemperatures)
     {
         JsonObject tempObject = tempArray.createNestedObject();
         tempObject["temperature"] = tempInfo.temperature;

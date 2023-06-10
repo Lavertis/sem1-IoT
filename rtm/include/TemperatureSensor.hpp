@@ -2,6 +2,7 @@
 #include <DS18B20.h>
 #include <ArduinoJson.h>
 #include <vector>
+#include <mutex>
 
 struct TemperatureInfo
 {
