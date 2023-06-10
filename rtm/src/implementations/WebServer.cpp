@@ -10,6 +10,7 @@ void WebServer::setup()
     server.on("/", HTTP_GET, handleRootRequest);
     server.on("/temperatures", HTTP_GET, handleTemperaturesRequest);
     server.on("/ip", HTTP_GET, handleIpRequest);
+    server.onNotFound(handleNotFound);
     server.begin();
 }
 
@@ -27,6 +28,11 @@ void WebServer::handleIpRequest(AsyncWebServerRequest *request)
 {
     IPAddress remoteIP = request->client()->remoteIP();
     request->send(200, "text/plain", remoteIP.toString());
+}
+
+void WebServer::handleNotFound(AsyncWebServerRequest *request)
+{
+    request->send(404, "text/plain", "Not found");
 }
 
 void WebServer::loadRootHtmlFromFile()
