@@ -116,6 +116,11 @@
           resDiv.textContent = `Resolution: ${temperatureInfo.resolution}`;
           square.appendChild(resDiv);
 
+          const nameDiv = document.createElement("div");
+          nameDiv.className = "name";
+          nameDiv.textContent = `${temperatureInfo.name}`;
+          square.appendChild(nameDiv);
+
           const addressDiv = document.createElement("div");
           addressDiv.className = "address";
           addressDiv.textContent = `${temperatureInfo.address}`;

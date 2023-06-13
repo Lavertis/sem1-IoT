@@ -2,8 +2,11 @@
 
 DS18B20 TemperatureSensor::ds{5};
 std::vector<TemperatureInfo> TemperatureSensor::temperatures;
-std::mutex temperatures_mutex;
 uint8_t TemperatureSensor::resolution = 12;
+String TemperatureSensor::sensorAddresses[] = {"28686BE50E000021", "2804A20F0D0000F8", "28D452E70E00002B", "28A6ED0E0D0000C3", "2885819D0E000091"};
+String TemperatureSensor::sensorNames[] = {"Kuchnia", "Salon", "Sypialnia", "Łazienka", "Pokój gościnny"};
+
+std::mutex temperatures_mutex;
 
 void TemperatureSensor::setResolution(uint8_t resolution)
 {
@@ -37,12 +40,25 @@ void TemperatureSensor::update()
         tempInfo.temperature = ds.getTempC();
         tempInfo.resolution = resolution;
         tempInfo.address = addressString;
+        tempInfo.name = getNameForAddress(addressString);
 
         tempTemperatures.push_back(tempInfo);
     }
 
     std::lock_guard<std::mutex> lock(temperatures_mutex);
     temperatures = tempTemperatures;
+}
+
+String TemperatureSensor::getNameForAddress(const String& address)
+{
+    for (size_t i = 0; i < sizeof(sensorAddresses) / sizeof(sensorAddresses[0]); i++)
+    {
+        if (address == sensorAddresses[i])
+        {
+            return sensorNames[i];
+        }
+    }
+    return "";
 }
 
 std::vector<TemperatureInfo> TemperatureSensor::getTemperatures()
@@ -68,6 +84,7 @@ String TemperatureSensor::getTemperaturesAsJson()
         tempObject["temperature"] = tempInfo.temperature;
         tempObject["resolution"] = tempInfo.resolution;
         tempObject["address"] = tempInfo.address.c_str();
+        tempObject["name"] = tempInfo.name.c_str();
     }
 
     String json;
