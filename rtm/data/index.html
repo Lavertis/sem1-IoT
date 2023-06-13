@@ -132,11 +132,11 @@
         function getTempColor(value, min, max) {
           switch (true) {
             case value < min:
-              return "#0000FF"; // Blue
+              return "#0000FF"; /* Blue */
             case value >= min && value <= max:
-              return "#00FF00"; // Green
+              return "#00FF00"; /* Green */
             case value > max:
-              return "#FF0000"; // Red
+              return "#FF0000"; /* Red */
           }
         }
 
@@ -204,7 +204,7 @@
 
         fetchClientIp();
         fetchTemperatures();
-        // Fetch new temperature data every 3 seconds by default
+        /* Fetch new temperature data every 3 seconds by default */
         intervalId = setInterval(fetchTemperatures, 3000);
       </script>
     </div>
